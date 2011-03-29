@@ -65,7 +65,13 @@ sub get_smaps_summary {
     my $proc_id= shift || "self";
     my $smaps_file= "/proc/$proc_id/smaps";
     open my $fh, "<", $smaps_file
-        or die "Failed to read '$smaps_file': $!";
+        or do {
+            my $errnum= 0+$!; # numify
+            my $errmsg= "$!"; # stringify
+            my $msg= "In get_smaps_summary, failed to read '$smaps_file': [$errnum] $errmsg";
+
+            die $msg;
+        };
     my %sum;
     while (<$fh>) {
         next unless substr($_,-3) eq "kB\n";

@@ -14,3 +14,9 @@ for my $thing (qw(Size Shared_Clean Shared_Dirty)) {
     ok(exists $smaps->{$thing}, "The $thing entry exists");
 }
 
+eval {
+    Linux::Smaps::Tiny::get_smaps_summary("HELLO THERE");
+    1;
+};
+my $err = $@;
+like($err, qr/HELLO THERE.*\[2\].*No such file or directory at/, "Sensible error messages");
