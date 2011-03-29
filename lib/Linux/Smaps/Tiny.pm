@@ -70,10 +70,8 @@ sub get_smaps_summary {
     while (<$fh>) {
         next unless substr($_,-3) eq "kB\n";
         my ($field, $value)= split /:/,$_;
-        if ($value) {
-            no warnings 'numeric';
-            $sum{$field}+=$value;
-        }
+        no warnings 'numeric';
+        $sum{$field}+=$value if $value;
     }
     close $fh;
     return \%sum;
