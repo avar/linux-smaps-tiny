@@ -4,7 +4,7 @@ use warnings FATAL => "all";
 
 use Exporter 'import';
 
-our @EXPORT_OK = qw(get_smaps_summary);
+our @EXPORT_OK = qw(get_smaps_summary get_smaps_summary2 get_smaps_summary3 get_smaps_summary4);
 
 =encoding utf8
 
@@ -73,6 +73,67 @@ sub get_smaps_summary {
         }
     }
     close $fh;
+    return \%sum;
+}
+
+sub get_smaps_summary2 {
+    my $proc_id= shift || $$;
+    my $smaps_file= "/proc/$proc_id/smaps";
+    open my $fh, "<", $smaps_file
+        or die "Failed to read '$smaps_file': $!";
+    my $file = do {
+        local (@ARGV, $/) = @_;
+        scalar <$fh>;
+    };
+    my (@fields) = $file =~ /^([A-Za-z_]+):\s*([0-9]+) kB$/mg;
+
+    my %sum;
+    while (my ($x, $y) = splice @fields, 0, 2) {
+        $sum{$x} += $y;
+    }
+    close $fh;
+    return \%sum;
+}
+
+sub get_smaps_summary3 {
+    my $proc_id= shift || $$;
+    my $smaps_file= "/proc/$proc_id/smaps";
+    open my $fh, "<", $smaps_file
+        or die "Failed to read '$smaps_file': $!";
+    my $file = do {
+        local (@ARGV, $/) = @_;
+        scalar <$fh>;
+    };
+    close $fh;
+
+    my %sum;
+    for (split /^/, $file) {
+        if (/^([A-Za-z_]+):\s*([0-9]+) kB$/) {
+            $sum{$1} += $2;
+        }
+    }
+
+    return \%sum;
+}
+
+sub get_smaps_summary4 {
+    my $proc_id= shift || $$;
+    my $smaps_file= "/proc/$proc_id/smaps";
+    open my $fh, "<", $smaps_file
+        or die "Failed to read '$smaps_file': $!";
+
+    my %sum;
+    while (<$fh>) {
+        next unless substr($_,-3) eq "kB\n";
+        my ($field, $value)= split /:/,$_;
+        if ($value) {
+            no warnings 'numeric';
+            $sum{$field}+=$value;
+        }
+    }
+
+    close $fh;
+
     return \%sum;
 }
 
