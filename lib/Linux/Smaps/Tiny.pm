@@ -37,8 +37,8 @@ L<Linux::Smaps> instead.
 
 =head2 get_smaps_summary
 
-Takes an optional process id (defaults to $$) and returns a summary of
-the smaps data for the given process. Dies if the process does not
+Takes an optional process id (defaults to C<self>) returns a summary
+of the smaps data for the given process. Dies if the process does not
 exist.
 
 Returns a hashref like this:
@@ -62,7 +62,7 @@ Values are in kB.
 =cut
 
 sub get_smaps_summary {
-    my $proc_id= shift || $$;
+    my $proc_id= shift || "self";
     my $smaps_file= "/proc/$proc_id/smaps";
     open my $fh, "<", $smaps_file
         or die "Failed to read '$smaps_file': $!";
