@@ -26,8 +26,12 @@ Linux::Smaps::Tiny - A minimal and fast alternative to L<Linux::Smaps>
 =head1 DESCRIPTION
 
 This module is a tiny interface to F</proc/$$/smaps> files. It was
-written because when we rolled out L<Linux::Smaps> at a Big Internet
-Company
+written because when we rolled out L<Linux::Smaps> in some critical
+code at a Big Internet Company we experienced slowdowns due to its
+generous use of method calls.
+
+If something like that isn't your use case you should probably use
+L<Linux::Smaps> instead.
 
 =head1 FUNCTIONS
 
