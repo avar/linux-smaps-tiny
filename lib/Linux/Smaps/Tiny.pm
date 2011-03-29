@@ -68,8 +68,11 @@ sub get_smaps_summary {
         or die "Failed to read '$smaps_file': $!";
     my %sum;
     while (<$fh>) {
-        if (/^([A-Za-z_]+):\s*([0-9]+) kB$/) {
-            $sum{$1} += $2;
+        next unless substr($_,-3) eq "kB\n";
+        my ($field, $value)= split /:/,$_;
+        if ($value) {
+            no warnings 'numeric';
+            $sum{$field}+=$value;
         }
     }
     close $fh;
