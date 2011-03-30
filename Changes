@@ -2,6 +2,8 @@ Revision history for Linux::Smaps::Tiny
 
 {{$NEXT}}
 
+    - Add a =cut before the 1; in Tiny.pm
+
 0.04 2011-03-30 09:24:57
 
     - Update documentation

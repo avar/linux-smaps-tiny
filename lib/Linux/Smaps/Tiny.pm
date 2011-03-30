@@ -94,4 +94,6 @@ Copyright 2011 Yves Orton <yves@cpan.org> and Ævar Arnfjörð Bjarmason
 This program is free software, you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
+=cut
+
 1;
