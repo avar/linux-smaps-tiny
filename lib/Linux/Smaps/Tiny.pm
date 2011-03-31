@@ -3,9 +3,8 @@ use strict;
 use warnings FATAL => "all";
 
 BEGIN {
-    our $VERSION = 0.01;
     require XSLoader;
-    XSLoader::load(__PACKAGE__, $VERSION);
+    XSLoader::load(__PACKAGE__, $Linux::Smaps::Tiny::VERSION || '0.01');
 }
 
 use Exporter 'import';
@@ -70,7 +69,10 @@ Values are in kB.
 
 =cut
 
-sub get_smaps_summary { goto &__get_smaps_summary }
+sub get_smaps_summary {
+    $_[0] = "/proc/self/smaps" unless $_[0];
+    goto &__get_smaps_summary
+}
 
 =head1 LICENSE AND COPYRIGHT
 

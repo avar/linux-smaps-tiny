@@ -23,16 +23,15 @@ MODULE = Linux::Smaps::Tiny PACKAGE = Linux::Smaps::Tiny
 PROTOTYPES: DISABLE
 
 SV*
-__get_smaps_summary()
+__get_smaps_summary(char* filename)
 PPCODE:
-    const char* filename = SvPVX(ST(0));
     FILE *file = fopen(filename, "r");
     struct smaps_sizes sizes;
     memset(&sizes, 0, sizeof sizes);
     HV* hash = newHV();
 
     if (!file) {
-        perror(filename);
+        croak("In get_smaps_summary, failed to read '%s': [%d] %s", filename, errno, strerror(errno));
     }
 
     char line [BUFSIZ];
