@@ -2,6 +2,14 @@ package Linux::Smaps::Tiny;
 use strict;
 use warnings FATAL => "all";
 
+BEGIN {
+    local ($@, $!);
+    eval {
+        require XSLoader;
+        XSLoader::load(__PACKAGE__, $Linux::Smaps::Tiny::VERSION || '0.01');
+    };
+}
+
 use Exporter 'import';
 
 our @EXPORT_OK = qw(get_smaps_summary);
@@ -64,26 +72,9 @@ Values are in kB.
 
 =cut
 
-sub get_smaps_summary {
-    my $proc_id= shift || "self";
-    my $smaps_file= "/proc/$proc_id/smaps";
-    open my $fh, "<", $smaps_file
-        or do {
-            my $errnum= 0+$!; # numify
-            my $errmsg= "$!"; # stringify
-            my $msg= "In get_smaps_summary, failed to read '$smaps_file': [$errnum] $errmsg";
-
-            die $msg;
-        };
-    my %sum;
-    while (<$fh>) {
-        next unless substr($_,-3) eq "kB\n";
-        my ($field, $value)= split /:/,$_;
-        no warnings 'numeric';
-        $sum{$field}+=$value if $value;
-    }
-    close $fh;
-    return \%sum;
+unless (defined &get_smaps_summary) {
+    require Linux::Smaps::Tiny::PP;
+    *get_smaps_summary = \&Linux::Smaps::Tiny::PP::__get_smaps_summary;
 }
 
 =head1 LICENSE AND COPYRIGHT
