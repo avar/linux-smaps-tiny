@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use Linux::Smaps;
 use Linux::Smaps::Tiny;
+use Linux::Smaps::Tiny::PP;
 use Benchmark qw/:all :hireswallclock/;
 
 cmpthese(10000, {
@@ -11,7 +12,12 @@ cmpthese(10000, {
         return;
     },
     "Linux::Smaps::Tiny" => sub {
-        Linux::Smaps::Tiny::get_smaps_summary;
+        Linux::Smaps::Tiny::get_smaps_summary();
         return;
     },
+    "Linux::Smaps::Tiny::PP" => sub {
+        Linux::Smaps::Tiny::PP::__get_smaps_summary();
+        return;
+    },
+
 });
