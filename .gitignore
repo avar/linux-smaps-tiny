@@ -1,1 +1,3 @@
 Linux-Smaps-Tiny-*
+.build/
+blib/
