@@ -1,6 +1,7 @@
 use strict;
 use warnings FATAL => "all";
 use Test::More;
+use List::Util qw(sum);
 
 plan skip_all => "This only works on Linux" unless $^O eq "linux";
 plan 'no_plan';
@@ -27,6 +28,8 @@ my @fields = qw(
 for my $thing (@fields) {
     ok(exists $smaps->{$thing}, "The $thing entry exists");
 }
+
+cmp_ok(sum(values %$smaps), ">", 0, "We got some memory reported");
 
 eval {
     Linux::Smaps::Tiny::get_smaps_summary("HELLO THERE");
