@@ -2,6 +2,9 @@ Revision history for Linux::Smaps::Tiny
 
 {{$NEXT}}
 
+    - We now parse smaps with XS code, and fall back to PP if we can't
+      can_cc().
+
 0.05 2011-03-30 10:27:33
 
     - Add a =cut before the 1; in Tiny.pm
