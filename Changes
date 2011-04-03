@@ -2,6 +2,8 @@ Revision history for Linux::Smaps::Tiny
 
 {{$NEXT}}
 
+0.06 2011-04-03 19:18:44
+
     - We now parse smaps with XS code, and fall back to PP if we can't
       can_cc().
 
