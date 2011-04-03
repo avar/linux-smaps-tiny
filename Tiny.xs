@@ -73,36 +73,24 @@ PPCODE:
 
 SV*
 __get_smaps_summary_slurp(char* filename)
-PPCODE:
-    FILE *file = fopen(filename, "r");
+PPCODE: {
+    FILE *file;
+    unsigned char buffer[10000];
+    int n;
     struct smaps_sizes sizes;
     memset(&sizes, 0, sizeof sizes);
     HV* hash = newHV();
+
+    file = fopen(filename, "r");
 
     if (!file) {
         croak("In get_smaps_summary, failed to read '%s': [%d] %s", filename, errno, strerror(errno));
     }
 
-    char line [BUFSIZ];
-    while (fgets(line, sizeof line, file))
-    {
-        char substr[32];
-        int n;
-        if (sscanf(line, "%31[^:]%n", substr, &n) == 1)
-        {
-            if      (strcmp(substr, "KernelPageSize") == 0) { sizes.KernelPageSize += n; }
-            else if (strcmp(substr, "MMUPageSize") == 0)    { sizes.MMUPageSize += n; }
-            else if (strcmp(substr, "Private_Clean") == 0)  { sizes.Private_Clean += n; }
-            else if (strcmp(substr, "Private_Dirty") == 0)  { sizes.Private_Dirty += n; }
-            else if (strcmp(substr, "Pss") == 0)            { sizes.Pss += n; }
-            else if (strcmp(substr, "Referenced") == 0)     { sizes.Referenced += n; }
-            else if (strcmp(substr, "Rss") == 0)            { sizes.Rss += n; }
-            else if (strcmp(substr, "Shared_Clean") == 0)   { sizes.Shared_Clean += n; }
-            else if (strcmp(substr, "Shared_Dirty") == 0)   { sizes.Shared_Dirty += n; }
-            else if (strcmp(substr, "Size") == 0)           { sizes.Size += n; }
-            else if (strcmp(substr, "Swap") == 0)           { sizes.Swap += n; }
-        }
-    }
+    n = fread(buffer, 10000, 1, file);
+
+    printf("buff = <%s>\n", (const char*)buffer);
+
     fclose(file);
 
     hv_store(hash, "KernelPageSize", strlen("KernelPageSize"), newSViv(sizes.KernelPageSize), 0);
