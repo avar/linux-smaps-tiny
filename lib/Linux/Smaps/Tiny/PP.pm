@@ -1,4 +1,4 @@
-package Linux::Smaps::Tiny;
+package Linux::Smaps::Tiny::PP;
 use strict;
 use warnings FATAL => "all";
 
