@@ -14,8 +14,12 @@ cmpthese(1000, {
         Linux::Smaps::Tiny::get_smaps_summary;
         return;
     },
-    "Linux::Smaps::Tiny::XS" => sub {
+    "Linux::Smaps::Tiny::XS (stdio)" => sub {
         Linux::Smaps::Tiny::get_smaps_summary_xs;
+        return;
+    },
+    "Linux::Smaps::Tiny::XS (mmap)" => sub {
+        Linux::Smaps::Tiny::get_smaps_summary_mmap;
         return;
     },
 });

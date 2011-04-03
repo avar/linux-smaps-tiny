@@ -96,6 +96,11 @@ sub get_smaps_summary_xs {
     goto &__get_smaps_summary_xs;
 }
 
+sub get_smaps_summary_mmap {
+    $_[0] = "/proc/self/smaps" unless $_[0];
+    goto &__get_smaps_summary_mmap;
+}
+
 
 =head1 LICENSE AND COPYRIGHT
 
