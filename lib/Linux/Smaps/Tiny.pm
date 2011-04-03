@@ -33,16 +33,30 @@ Linux::Smaps::Tiny - A minimal and fast alternative to L<Linux::Smaps>
 
 =head1 DESCRIPTION
 
-This module is a tiny interface to F</proc/$$/smaps> files. It was
+This module is a tiny interface to F</proc/PID/smaps> files. It was
 written because when we rolled out L<Linux::Smaps> in some critical
 code at a Big Internet Company we experienced slowdowns that were
 solved by writing a more minimal version.
+
+This module will try to use XS code to parse the smaps file, and if
+that doesn't work it'll fall back on a pure-Perl version.
 
 If something like that isn't your use case you should probably use
 L<Linux::Smaps> instead. Also note that L<Linux::Smaps> itself L<has
 been
 optimized|http://mail-archives.apache.org/mod_mbox/perl-modperl/201103.mbox/browser>
 since this module was initially written.
+
+=head2 SPEED
+
+The distribution comes with a F<contrib/benchmark.pl> script. As of
+writing this is the speed of L<Linux::Smaps>
+v.s. L<Linux::Smaps::Tiny>, both the XS and PP versions:
+
+                             Rate Linux::Smaps Linux::Smaps::Tiny::PP Linux::Smaps::Tiny
+    Linux::Smaps            810/s           --                   -22%               -61%
+    Linux::Smaps::Tiny::PP 1033/s          28%                     --               -51%
+    Linux::Smaps::Tiny     2101/s         159%                   103%                 --
 
 =head1 FUNCTIONS
 
