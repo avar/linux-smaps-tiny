@@ -23,7 +23,7 @@ MODULE = Linux::Smaps::Tiny PACKAGE = Linux::Smaps::Tiny
 PROTOTYPES: DISABLE
 
 SV*
-__get_smaps_summary(char* filename)
+__get_smaps_summary_xs(char* filename)
 PPCODE:
     FILE *file = fopen(filename, "r");
     struct smaps_sizes sizes;
