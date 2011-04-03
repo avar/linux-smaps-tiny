@@ -18,8 +18,8 @@ cmpthese(1000, {
         Linux::Smaps::Tiny::get_smaps_summary_xs;
         return;
     },
-    "Linux::Smaps::Tiny::XS (mmap)" => sub {
-        Linux::Smaps::Tiny::get_smaps_summary_mmap;
+    "Linux::Smaps::Tiny::XS (slurp)" => sub {
+        Linux::Smaps::Tiny::get_smaps_summary_slurp;
         return;
     },
 });
