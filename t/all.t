@@ -10,7 +10,21 @@ use_ok 'Linux::Smaps::Tiny';
 my $smaps = Linux::Smaps::Tiny::get_smaps_summary();
 cmp_ok(ref($smaps), "eq", "HASH", "We got a hash back");
 
-for my $thing (qw(Size Shared_Clean Shared_Dirty)) {
+my @fields = qw(
+    KernelPageSize
+    MMUPageSize
+    Private_Clean
+    Private_Dirty
+    Pss
+    Referenced
+    Rss
+    Shared_Clean
+    Shared_Dirty
+    Size
+    Swap
+);
+
+for my $thing (@fields) {
     ok(exists $smaps->{$thing}, "The $thing entry exists");
 }
 
