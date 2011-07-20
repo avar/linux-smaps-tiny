@@ -29,7 +29,7 @@ Linux::Smaps::Tiny - A minimal and fast alternative to L<Linux::Smaps>
     my $shared_clean = $summary->{Shared_Clean};
     my $shared_dirty = $summary->{Shared_Dirty};
 
-    warn "Size / Clean / Dirty = $size / $shared_clean/ $shared_dirty";
+    print "Size / Clean / Dirty = $size / $shared_clean / $shared_dirty\n";
 
 =head1 DESCRIPTION
 
