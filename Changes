@@ -2,6 +2,8 @@ Revision history for Linux::Smaps::Tiny
 
 {{$NEXT}}
 
+0.08 2011-07-20 19:20:57
+
     - The 0.07 releas had a bugfix in the XS API. It now actually
       works as documented when given an argument.
 
