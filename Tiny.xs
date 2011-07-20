@@ -24,13 +24,18 @@ MODULE = Linux::Smaps::Tiny PACKAGE = Linux::Smaps::Tiny
 PROTOTYPES: DISABLE
 
 SV*
-get_smaps_summary(char* filename = "/proc/self/smaps")
+get_smaps_summary(char* process = "self")
 PPCODE:
     struct smaps_sizes sizes;
     memset(&sizes, 0, sizeof sizes);
-    HV* hash = newHV();
-    FILE *file = fopen(filename, "r");
 
+    char filename[100];
+    memset(&filename, 0, sizeof filename);
+    strcat(filename, "/proc/");
+    strcat(filename, process);
+    strcat(filename, "/smaps");
+
+    FILE *file = fopen(filename, "r");
     if (!file) {
         croak("In get_smaps_summary, failed to read '%s': [%d] %s", filename, errno, strerror(errno));
     }
@@ -61,6 +66,7 @@ PPCODE:
     }
     fclose(file);
 
+    HV* hash = newHV();
     (void)hv_store(hash, "KernelPageSize", strlen("KernelPageSize"), newSViv(sizes.KernelPageSize), 0);
     (void)hv_store(hash, "MMUPageSize",    strlen("MMUPageSize"),    newSViv(sizes.MMUPageSize),    0);
     (void)hv_store(hash, "Private_Clean",  strlen("Private_Clean"),  newSViv(sizes.Private_Clean),  0);

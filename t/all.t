@@ -8,9 +8,6 @@ plan 'no_plan';
 
 use_ok 'Linux::Smaps::Tiny';
 
-my $smaps = Linux::Smaps::Tiny::get_smaps_summary();
-cmp_ok(ref($smaps), "eq", "HASH", "We got a hash back");
-
 my @fields = qw(
     KernelPageSize
     MMUPageSize
@@ -25,11 +22,17 @@ my @fields = qw(
     Swap
 );
 
-for my $thing (@fields) {
-    ok(exists $smaps->{$thing}, "The $thing entry exists");
-}
+for my $arg ([], [$$]) {
+    my $smaps = Linux::Smaps::Tiny::get_smaps_summary(@$arg);
+    cmp_ok(ref($smaps), "eq", "HASH", "We got a hash back");
 
-cmp_ok(sum(values %$smaps), ">", 0, "We got some memory reported");
+
+    for my $thing (@fields) {
+        ok(exists $smaps->{$thing}, "The $thing entry exists");
+    }
+
+    cmp_ok(sum(values %$smaps), ">", 0, "We got some memory reported");
+}
 
 eval {
     Linux::Smaps::Tiny::get_smaps_summary("HELLO THERE");
