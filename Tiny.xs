@@ -26,10 +26,10 @@ PROTOTYPES: DISABLE
 SV*
 get_smaps_summary(char* filename = "/proc/self/smaps")
 PPCODE:
-    FILE *file = fopen(filename, "r");
     struct smaps_sizes sizes;
     memset(&sizes, 0, sizeof sizes);
     HV* hash = newHV();
+    FILE *file = fopen(filename, "r");
 
     if (!file) {
         croak("In get_smaps_summary, failed to read '%s': [%d] %s", filename, errno, strerror(errno));
