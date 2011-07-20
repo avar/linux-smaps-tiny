@@ -42,6 +42,10 @@ PPCODE:
         int n;
         if (sscanf(line, "%32[^:]: %d", substr, &n) == 2)
         {
+            /* I'm counting on a modern compiler like GCC or clang to
+             * optimize this to a jump table. They can actually do
+             * that these days with their fancy technology.
+             */
             if      (strcmp(substr, "KernelPageSize") == 0) { sizes.KernelPageSize += n; }
             else if (strcmp(substr, "MMUPageSize")    == 0) { sizes.MMUPageSize    += n; }
             else if (strcmp(substr, "Private_Clean")  == 0) { sizes.Private_Clean  += n; }
