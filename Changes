@@ -2,6 +2,9 @@ Revision history for Linux::Smaps::Tiny
 
 {{$NEXT}}
 
+    - CPAN RT #78029: fix a memory leak reported by Norbert
+      Buchmüller.
+
 0.08 2011-07-20 19:20:57
 
     - The 0.07 releas had a bugfix in the XS API. It now actually
