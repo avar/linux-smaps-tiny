@@ -2,6 +2,8 @@ Revision history for Linux::Smaps::Tiny
 
 {{$NEXT}}
 
+0.10 2014-12-01 21:26:04
+
     - Fix test failures under non-C locales, I was matching against
       strerror(), just don't do that. See RT #95936.
 
