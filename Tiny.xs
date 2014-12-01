@@ -37,7 +37,7 @@ PPCODE:
 
     FILE *file = fopen(filename, "r");
     if (!file) {
-        croak("In get_smaps_summary, failed to read '%s': [%d] %s", filename, errno, strerror(errno));
+        croak("Failed to read '%s': [%d] %s", filename, errno, strerror(errno));
     }
 
     char line[100];

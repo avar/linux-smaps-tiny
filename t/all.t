@@ -39,4 +39,4 @@ eval {
     1;
 };
 my $err = $@;
-like($err, qr/HELLO THERE.*\[2\].*No such file or directory at/, "Sensible error messages");
+like($err, qr[failed to read '/proc/HELLO THERE/smaps'], "Sensible error messages");

@@ -2,6 +2,9 @@ Revision history for Linux::Smaps::Tiny
 
 {{$NEXT}}
 
+    - Fix test failures under non-C locales, I was matching against
+      strerror(), just don't do that. See RT #95936.
+
 0.09 2012-07-01 15:39:17
 
     - CPAN RT #78029: fix a memory leak reported by Norbert
