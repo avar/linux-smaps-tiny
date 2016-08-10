@@ -16,7 +16,7 @@ cmpthese(10000, {
         return;
     },
     "Linux::Smaps::Tiny::PP" => sub {
-        Linux::Smaps::Tiny::PP::__get_smaps_summary();
+        Linux::Smaps::Tiny::PP::get_smaps_summary();
         return;
     },
 

@@ -2,6 +2,24 @@ Revision history for Linux::Smaps::Tiny
 
 {{$NEXT}}
 
+    - Ever since 0.09 we haven't been using the XS version at all.
+
+      The reason for this was that due to our intaction with
+      Dist::Zilla we wouldn't define a $VERSION at BEGIN time, and
+      would default to 0.01 as a placeholder, DynaLoader would
+      silently fail to load it, and we'd always use the pure-perl
+      version.
+
+    - We now warn on compile-time if we can't load the XS version.
+
+    - Document how to use the pure-perl version directly, and make it
+      use the same API, for anyone who's interested in that, e.g. for
+      testing.
+
+    - Update the benchmark v.s. Linux::Smaps for its latest version &
+      ours. We're proportionally faster now than when I initially
+      released this.
+
 0.10 2014-12-01 21:26:04
 
     - Fix test failures under non-C locales, I was matching against

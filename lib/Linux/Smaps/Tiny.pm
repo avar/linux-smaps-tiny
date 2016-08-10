@@ -6,7 +6,12 @@ BEGIN {
     local ($@, $!);
     eval {
         require XSLoader;
-        XSLoader::load(__PACKAGE__, $Linux::Smaps::Tiny::VERSION || '0.01');
+        XSLoader::load(__PACKAGE__, $Linux::Smaps::Tiny::VERSION);
+        1;
+    } or do {
+        my $error = $@ // "Zombie Error";
+
+        warn "Unable to load the XS version of <" . __PACKAGE__ . ">. Falling back on the pure-perl version!: <$@>";
     };
 }
 
@@ -39,24 +44,27 @@ code at a Big Internet Company we experienced slowdowns that were
 solved by writing a more minimal version.
 
 This module will try to use XS code to parse the smaps file, and if
-that doesn't work it'll fall back on a pure-Perl version.
+that doesn't work it'll fall back on a pure-Perl version. You can also
+use only the pure-perl version by using L<Linux::Smaps::Tiny::PP>
+directly, it has the same API and exports.
 
-If something like that isn't your use case you should probably use
-L<Linux::Smaps> instead. Also note that L<Linux::Smaps> itself L<has
-been
+We'll warn on compile-time if we can't load the XS version.
+
+If speed isn't a concern you should probably use L<Linux::Smaps>
+instead. Also note that L<Linux::Smaps> itself L<has been
 optimized|http://mail-archives.apache.org/mod_mbox/perl-modperl/201103.mbox/browser>
 since this module was initially written.
 
 =head2 SPEED
 
 The distribution comes with a F<contrib/benchmark.pl> script. As of
-writing this is the speed of L<Linux::Smaps>
-v.s. L<Linux::Smaps::Tiny>, both the XS and PP versions:
+writing this is the speed of L<Linux::Smaps> 0.13
+v.s. L<Linux::Smaps::Tiny 0.11>, both the XS and PP versions:
 
                              Rate Linux::Smaps Linux::Smaps::Tiny::PP Linux::Smaps::Tiny
-    Linux::Smaps            810/s           --                   -22%               -61%
-    Linux::Smaps::Tiny::PP 1033/s          28%                     --               -51%
-    Linux::Smaps::Tiny     2101/s         159%                   103%                 --
+    Linux::Smaps            672/s           --                   -37%               -74%
+    Linux::Smaps::Tiny::PP 1067/s          59%                     --               -59%
+    Linux::Smaps::Tiny     2618/s         290%                   145%                 --
 
 =head1 FUNCTIONS
 
@@ -88,13 +96,13 @@ Values are in kB.
 
 unless (defined &get_smaps_summary) {
     require Linux::Smaps::Tiny::PP;
-    *get_smaps_summary = \&Linux::Smaps::Tiny::PP::__get_smaps_summary;
+    *get_smaps_summary = \&Linux::Smaps::Tiny::PP::get_smaps_summary;
 }
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2011 Yves Orton <yves@cpan.org> and Ævar Arnfjörð Bjarmason
-<avar@cpan.org>
+Copyright 2011-2016 Yves Orton <yves@cpan.org> and Ævar Arnfjörð
+Bjarmason <avar@cpan.org>
 
 This program is free software, you can redistribute it and/or modify
 it under the same terms as Perl itself.
