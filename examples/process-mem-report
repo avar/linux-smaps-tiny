@@ -1,0 +1,207 @@
+#!/usr/bin/perl
+
+use 5.010;
+use strict;
+use warnings;
+use utf8;
+
+use Linux::Smaps::Tiny qw(get_smaps_summary);
+
+use Getopt::Long;
+use Pod::Usage;
+use File::Basename qw(basename);
+
+use List::Util qw(sum);
+use Path::Class qw(file dir);
+use DateTime;
+use Time::HiRes qw(time sleep);
+use IO::AtomicFile;
+
+binmode STDOUT, ':encoding(UTF-8)';
+
+exit main() unless caller();
+
+sub main {
+    my $help;
+    my $runtime   = -1;
+    my $max_len   = 80;
+    my $max_lines = 30;
+    my $refresh   = 10;
+    my $wfilename;
+    my $wstrftime;
+    GetOptions(
+        'help|h'        => \$help,
+        'runtime|t=s'   => \$runtime,
+        'maxlen|l=s'    => \$max_len,
+        'maxlines|n=s'  => \$max_lines,
+        'refresh|r=s'   => \$refresh,
+        'write|w=s'     => \$wfilename,
+        'wstrftime|f=s' => \$wstrftime,
+    ) or pod2usage;
+    pod2usage({-verbose => 99, -sections => 'NAME|SYNOPSIS|DESCRIPTION'}) if $help;
+
+    my %processes;
+    my @processes_sorted;
+    my $max_used    = -1;
+    my $max_used_dt = '';
+    my $start       = time();
+    my $start_dt    = DateTime->now('time_zone' => 'local');
+    my $endtime     = $start + $runtime * 60;
+    my $fh_update;
+
+    while (($runtime < 0) || (time() < $endtime)) {
+        my $step_time = time();
+
+        my %top_n = %{top_N()};
+        my $total_used = sum map {$_->{size}} values %top_n;
+        if ($total_used > $max_used) {
+            $max_used = $total_used;
+            $max_used_dt = DateTime->now('time_zone' => 'local');
+        }
+        %processes = (%processes, %top_n);
+        @processes_sorted =
+            map  {$processes{$_}}
+            sort {$processes{$b}->{size} <=> $processes{$a}->{size}}
+            keys %processes;
+        @processes_sorted = splice(@processes_sorted, 0, $max_lines);
+        %processes = map {$_->{pid} => $_} @processes_sorted;
+
+        $fh_update = IO::AtomicFile->open(
+            $wfilename
+                . ($wstrftime ? DateTime->now(time_zone => 'local')->strftime($wstrftime) : ''),
+            "w"
+            )
+            || die('failed to open ' . $wfilename . ': ' . $!)
+            if $wfilename;
+
+        say '-' x 50;
+        foreach my $proces (@processes_sorted) {
+            my $line = sprintf('%s %s %s',
+                $proces->{time_str}, format_size($proces->{size}),
+                $proces->{cmdline});
+            say str_shorten($line, $max_len);
+            $fh_update->say($line)
+                if $wfilename;
+        }
+        my $mem_line =
+              "\n"
+            . sprintf('max mem used: %s at: %s', format_size($max_used), $max_used_dt) . "\n"
+            . 'since: '
+            . $start_dt;
+        say $mem_line;
+        if ($wfilename) {
+            $fh_update->say($mem_line);
+            $fh_update->close;
+        }
+
+        my $to_sleep = $refresh - (time() - $step_time);
+        sleep($to_sleep)
+            if ($to_sleep > 0);
+    }
+}
+
+sub top_N {
+    my $proc_dir = dir('/proc');
+    my %processes;
+    foreach my $proc ($proc_dir->children(no_hidden => 1)) {
+        my $pid = basename($proc);
+        next if $pid !~ m/^\d+$/;
+        $pid += 0;
+
+        my $summary      = eval {get_smaps_summary($pid)} // {};
+        my $size         = $summary->{Rss};
+        my $shared_clean = $summary->{Shared_Clean};
+        my $shared_dirty = $summary->{Shared_Dirty};
+        next unless $size;
+
+        my @cmdline = eval {split('', file($proc . '/cmdline')->slurp)};
+        next unless @cmdline;
+        for (my $i = 0; $i < @cmdline; $i++) {
+            $cmdline[$i] = ' '
+                if ord($cmdline[$i]) == 0;
+        }
+        my $cmdline_str = join('', @cmdline);
+        $cmdline_str =~ s/\s+$//;
+
+        $processes{$pid} = {
+            size     => $size,
+            cmdline  => $cmdline_str,
+            time     => time(),
+            time_str => DateTime->now(time_zone => 'local') . '',
+            pid      => $pid,
+        };
+    }
+    return \%processes;
+}
+
+sub format_size {
+    my ($mem_size) = @_;
+
+    if ($mem_size < 1024) {
+        return sprintf('%.2fK', $mem_size);
+    }
+    elsif ($mem_size < 1024 * 1024) {
+        return sprintf('%.2fM', $mem_size / 1024);
+    }
+    else {
+        return sprintf('%.2fG', $mem_size / (1024 * 1024));
+    }
+}
+
+sub str_shorten {
+    my ($line, $length) = @_;
+    return $line
+        if (length($line) < $length);
+    return substr($line, 0, $length - 1) . '…';
+}
+
+__END__
+
+=encoding utf8
+
+=head1 NAME
+
+process-mem-report - record & print top N memory consumers over time
+
+=head1 SYNOPSIS
+
+    process-mem-report
+
+        --help
+        --runtime|t   number of minutes to run the measurement, default infinite
+        --maxlen|l    maximum output line length, default 80
+        --maxlines|n  number of top memory greedy processes to show, default 30
+        --refresh|r   refresh rate in seconds, default 10
+        --write|w     write to file
+        --wstrftime|f add strftime formatted suffix to write file
+
+=head1 DESCRIPTION
+
+Will go through all procesed and read their memory usage using smaps and
+show top N. After refresh time will re-read all process together with
+previous N will show new top N.
+
+If executed unprivileged, will consider processe of current user only.
+
+=head1 EXAMPLE
+
+    $ process-mem-report -n 10
+    --------------------------------------------------
+    2020-02-22T22:22:14 885.48M /usr/lib/thunderbird/thunderbird
+    2020-02-22T22:22:14 653.38M firefox-esr
+    2020-02-22T22:22:15 487.50M /usr/lib/firefox-esr/firefox-esr -contentproc -chil…
+    2020-02-22T22:22:15 451.92M /usr/lib/chromium/chromium --show-component-extensi…
+    2020-02-22T22:22:14 380.55M /usr/lib/firefox-esr/firefox-esr -contentproc -chil…
+    2020-02-22T22:22:14 377.14M cinnamon --replace
+    2020-02-22T22:22:15 321.80M /usr/lib/firefox-esr/firefox-esr -contentproc -chil…
+    2020-02-22T22:22:14 308.17M /usr/lib/firefox-esr/firefox-esr -contentproc -chil…
+    2020-02-22T22:22:15 257.77M /usr/lib/firefox-esr/firefox-esr -contentproc -chil…
+    2020-02-22T22:22:15 247.15M /usr/lib/firefox-esr/firefox-esr -contentproc -chil…
+
+    max mem used: 7.50G at: 2020-02-22T22:22:15
+    since: 2020-02-22T22:22:13
+
+    # hourly written report of top memory greedy processes
+    $ sudo process-mem-report -r 5 -n 80 -w mem-top_ -f %Y%m%d_%H
+
+=cut
